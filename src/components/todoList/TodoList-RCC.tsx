@@ -1,16 +1,11 @@
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import { Alert, AlertTitle, Button, Checkbox, IconButton, Input, List, ListItem, Typography } from "@mui/material";
+import { Alert, AlertTitle, Button, Input, List, Typography } from "@mui/material";
 import Box from '@mui/material/Box';
 import React from "react";
+import { ITodoState } from './Todolist.types';
+import SingleTodo from './single-todo/SingleTodo-RCC';
 
 type ITodoListProps = Record<string, never>;
 
-interface ITodoState {
-    id: string;
-    title: string;
-    done: boolean;
-}
 
 interface ITodoListState {
     todos: ITodoState[];
@@ -65,6 +60,17 @@ class TodoList extends React.Component<ITodoListProps, ITodoListState> {
     }
 
 
+    handleTodoEdit(todoId: string, newValue: string) {
+        const newTodos = this.state.todos.map(todo => {
+            if (todo.id === todoId) {
+               return {...todo, title: newValue}
+            }
+            return todo;
+        })
+
+        this.setState({...this.state, todos: newTodos})
+    }
+
     render(): React.ReactNode {
         return (
             <Box>
@@ -72,7 +78,7 @@ class TodoList extends React.Component<ITodoListProps, ITodoListState> {
 
                 <form onSubmit={this.handleFormSubmit.bind(this)}>
                     <Box mb='12px' maxWidth={'max-content'} mx="auto" display={'flex'} gap={'4px'} alignItems={'center'}>
-                        <Input placeholder="Enter your todo" value={this.state.todoItem} onChange={this.handleInputChange.bind(this)} />
+                        <Input placeholder="Enter your todo" value={this.state.todoItem} onChange={this.handleInputChange.bind(this)} size="small"  />
                         <Button variant="contained" type="submit">Add</Button>
                     </Box>
                 </form>
@@ -83,24 +89,17 @@ class TodoList extends React.Component<ITodoListProps, ITodoListState> {
                         </Alert>
                     )}
                     <List>
-                        {this.state.todos.length > 0 && this.state.todos.map(todo => (
-                            <ListItem key={todo.id} divider sx={{padding: 0}}>
-                                <Box display="flex" justifyContent={'space-between'} alignItems={'center'} width={'100%'}>
-                                    <Box display="flex" alignItems={'center'} gap='4px'>
-                                        <Checkbox checked={todo.done} onChange={e => this.handleCheckBoxChange.call(this, e, todo.id)}  />
-                                        <Typography component={'label'} variant="subtitle2" fontSize={'18px'} sx={{textDecoration: todo.done ? 'line-through' : 'none'}}>{todo.title}</Typography>
-                                    </Box>
-                                    <Box>
-                                        <IconButton aria-label="Edit" color="primary">
-                                            <EditNoteIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="Delete" color="error" onClick={this.handleTodoDelete.bind(this, todo.id)} >
-                                            <DeleteIcon  />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                            </ListItem>
-                        ))}
+                        {
+                            this.state.todos.length > 0 && this.state.todos.map(todo => (
+                                <SingleTodo
+                                    key={todo.id}
+                                    {...todo}
+                                    handleCheckBoxChange={this.handleCheckBoxChange.bind(this)}
+                                    handleTodoDelete={this.handleTodoDelete.bind(this)}
+                                    handleTodoEdit={this.handleTodoEdit.bind(this)}
+                                />
+                            ))
+                        }
                     </List>
                 </Box>
             </Box>
